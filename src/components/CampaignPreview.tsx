@@ -1,4 +1,3 @@
-import { getTheme } from '../data/themes';
 import type { Campaign } from '../types';
 
 type CampaignPreviewProps = {
@@ -8,14 +7,18 @@ type CampaignPreviewProps = {
 };
 
 export function CampaignPreview({ campaign, previewMode, onPreviewModeChange }: CampaignPreviewProps) {
-  const theme = getTheme(campaign.theme);
+  const previewStatus = !campaign.headline.trim()
+    ? 'Needs headline'
+    : !campaign.intro.trim()
+      ? 'Needs intro'
+      : 'Ready for review';
 
   return (
     <section className="panel preview-panel" aria-labelledby="preview-heading">
       <div className="panel-heading preview-heading-row">
         <div>
-          <p className="eyebrow">Live preview</p>
-          <h2 id="preview-heading">Donor-facing page</h2>
+          <p className="eyebrow">Campaign preview</p>
+          <h2 id="preview-heading">Donation page preview</h2>
         </div>
         <div className="segmented-control" aria-label="Preview size">
           <button
@@ -38,33 +41,19 @@ export function CampaignPreview({ campaign, previewMode, onPreviewModeChange }: 
       <div className={`preview-frame ${previewMode}`} aria-live="polite">
         <article
           className="campaign-card"
-          style={{
-            '--theme-accent': theme.accent,
-            '--theme-bg': theme.background,
-            '--theme-surface': theme.surface,
-            '--theme-text': theme.text,
-          } as React.CSSProperties}
         >
           <div className="campaign-copy">
-            {campaign.urgencyMessage && <p className="urgency">{campaign.urgencyMessage}</p>}
-            <h3>{campaign.headline || 'Your campaign headline will appear here'}</h3>
-            <p>{campaign.intro || 'Add a short, specific paragraph that tells donors what their gift makes possible.'}</p>
+            <p className="preview-status">{previewStatus}</p>
+            <h3>{campaign.headline || 'Campaign headline appears here'}</h3>
+            <p>{campaign.intro || 'Add a short paragraph explaining the campaign and why it matters.'}</p>
             <div className="amount-row" aria-label="Suggested donation amounts">
               {campaign.donationAmounts.map((amount) => (
                 <button type="button" key={amount}>${amount}</button>
               ))}
             </div>
             <button type="button" className="campaign-cta">{campaign.ctaText || 'Donate'}</button>
-            {campaign.thankYouMessage && <p className="thanks">{campaign.thankYouMessage}</p>}
+            <p className="preview-note">Thank you for helping move this campaign toward launch.</p>
           </div>
-
-          {campaign.heroImageUrl ? (
-            <img src={campaign.heroImageUrl} alt={campaign.heroImageAlt} />
-          ) : (
-            <div className="image-placeholder" aria-label="Campaign image placeholder">
-              <span>Campaign image</span>
-            </div>
-          )}
         </article>
       </div>
     </section>

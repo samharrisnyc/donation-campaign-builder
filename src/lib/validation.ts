@@ -18,7 +18,7 @@ export function validateCampaign(campaign: Campaign): FieldErrors {
   }
 
   if (!campaign.intro.trim()) {
-    errors.intro = 'Write a short intro so donors know what their gift supports.';
+    errors.intro = 'Write a short intro so donors understand the ask.';
   }
 
   if (!campaign.ctaText.trim()) {
@@ -27,10 +27,6 @@ export function validateCampaign(campaign: Campaign): FieldErrors {
 
   if (campaign.donationAmounts.length < 2) {
     errors.donationAmountsText = 'Add at least two donation amounts.';
-  }
-
-  if (campaign.heroImageUrl.trim() && !campaign.heroImageAlt.trim()) {
-    errors.heroImageAlt = 'Add alt text when a hero image URL is provided.';
   }
 
   return errors;
@@ -46,10 +42,6 @@ export function getAccessibilityWarnings(campaign: Campaign) {
 
   if (campaign.ctaText.trim().length < 8 || genericCtaTerms.includes(normalizedCta)) {
     warnings.push('CTA text is short or generic. Make the action specific to the donation moment.');
-  }
-
-  if (campaign.heroImageUrl.trim() && !campaign.heroImageAlt.trim()) {
-    warnings.push('Hero image needs alt text because the image URL is present.');
   }
 
   if (campaign.donationAmounts.length === 0) {

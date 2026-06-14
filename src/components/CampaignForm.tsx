@@ -1,6 +1,5 @@
-import { themes } from '../data/themes';
 import { formatDonationAmounts, parseDonationAmounts } from '../lib/validation';
-import type { Campaign, FieldErrors, ThemeId } from '../types';
+import type { Campaign, FieldErrors } from '../types';
 
 type CampaignFormProps = {
   campaign: Campaign;
@@ -21,7 +20,7 @@ export function CampaignForm({ campaign, errors, onChange }: CampaignFormProps) 
       </div>
 
       <div className="form-grid">
-        <label>
+        <label className="span-2">
           Campaign name
           <input
             aria-label="Campaign name"
@@ -31,7 +30,7 @@ export function CampaignForm({ campaign, errors, onChange }: CampaignFormProps) 
           />
         </label>
 
-        <label>
+        <label className="span-2">
           Headline
           <input
             aria-label="Headline"
@@ -52,7 +51,7 @@ export function CampaignForm({ campaign, errors, onChange }: CampaignFormProps) 
             onChange={(event) => update('intro', event.target.value)}
             aria-invalid={Boolean(errors.intro)}
             aria-describedby={errors.intro ? 'intro-error' : undefined}
-            rows={4}
+            rows={3}
             placeholder="Explain the need, who benefits, and why now."
           />
           {errors.intro && <span id="intro-error" className="field-error">{errors.intro}</span>}
@@ -84,68 +83,6 @@ export function CampaignForm({ campaign, errors, onChange }: CampaignFormProps) 
             placeholder="Give a meal today"
           />
           {errors.ctaText && <span id="cta-error" className="field-error">{errors.ctaText}</span>}
-        </label>
-
-        <fieldset className="theme-fieldset span-2">
-          <legend>Theme</legend>
-          <div className="theme-options">
-            {themes.map((theme) => (
-              <label key={theme.id} className="theme-option">
-                <input
-                  type="radio"
-                  name="theme"
-                  value={theme.id}
-                  checked={campaign.theme === theme.id}
-                  onChange={(event) => update('theme', event.target.value as ThemeId)}
-                />
-                <span className="swatch" style={{ background: theme.accent }} />
-                {theme.name}
-              </label>
-            ))}
-          </div>
-        </fieldset>
-
-        <label>
-          Optional hero image URL
-          <input
-            aria-label="Optional hero image URL"
-            value={campaign.heroImageUrl}
-            onChange={(event) => update('heroImageUrl', event.target.value)}
-            placeholder="https://images.unsplash.com/..."
-          />
-        </label>
-
-        <label>
-          Hero image alt text
-          <input
-            aria-label="Hero image alt text"
-            value={campaign.heroImageAlt}
-            onChange={(event) => update('heroImageAlt', event.target.value)}
-            aria-invalid={Boolean(errors.heroImageAlt)}
-            aria-describedby={errors.heroImageAlt ? 'alt-error' : undefined}
-            placeholder="Volunteers packing produce boxes"
-          />
-          {errors.heroImageAlt && <span id="alt-error" className="field-error">{errors.heroImageAlt}</span>}
-        </label>
-
-        <label>
-          Urgency message
-          <input
-            aria-label="Urgency message"
-            value={campaign.urgencyMessage}
-            onChange={(event) => update('urgencyMessage', event.target.value)}
-            placeholder="Match active through Friday"
-          />
-        </label>
-
-        <label>
-          Thank-you message
-          <input
-            aria-label="Thank-you message"
-            value={campaign.thankYouMessage}
-            onChange={(event) => update('thankYouMessage', event.target.value)}
-            placeholder="Thank you for showing up for neighbors."
-          />
         </label>
       </div>
     </section>

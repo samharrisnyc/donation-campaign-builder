@@ -1,9 +1,19 @@
-import { render, screen, within } from '@testing-library/react';
+import { render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import App from './App';
 
 beforeEach(() => {
   localStorage.clear();
+});
+
+test('loads a realistic sample campaign by default', () => {
+  render(<App />);
+
+  expect(screen.getByLabelText('Campaign name')).toHaveValue('Community Kitchen Spring Drive');
+  expect(screen.getByLabelText('Headline')).toHaveValue('Help serve 4,000 fresh meals this spring');
+  expect(screen.getByLabelText('Donation amounts')).toHaveValue('10, 25, 50, 100');
+  expect(screen.getByLabelText('CTA button text')).toHaveValue('Give a meal today');
+  expect(screen.getAllByText('Ready for review').length).toBeGreaterThan(0);
 });
 
 test('shows validation feedback when required content is removed', async () => {
@@ -14,7 +24,8 @@ test('shows validation feedback when required content is removed', async () => {
   await user.clear(headlineInput);
 
   expect(screen.getByText('Add a clear campaign headline.')).toBeInTheDocument();
-  expect(screen.getByText('Draft needs a few required fields before it is campaign-ready.')).toBeInTheDocument();
+  expect(screen.getByText('Needs headline')).toBeInTheDocument();
+  expect(screen.getAllByText('Needs review').length).toBeGreaterThan(0);
 });
 
 test('updates the live preview as headline changes', async () => {
@@ -30,22 +41,29 @@ test('updates the live preview as headline changes', async () => {
   expect(within(preview as HTMLElement).getByText('Fund the winter shelter hotline')).toBeInTheDocument();
 });
 
-test('saves and loads a draft from local storage', async () => {
+test('auto-saves the current draft locally', async () => {
   const user = userEvent.setup();
   render(<App />);
 
-  await user.click(screen.getByRole('button', { name: 'New campaign' }));
   await user.clear(screen.getByLabelText('Campaign name'));
   await user.type(screen.getByLabelText('Campaign name'), 'Library access drive');
   await user.clear(screen.getByLabelText('Headline'));
   await user.type(screen.getByLabelText('Headline'), 'Open the reading room seven days a week');
-  await user.click(screen.getByRole('button', { name: 'Save draft' }));
 
-  expect(screen.getByText('Library access drive')).toBeInTheDocument();
+  await waitFor(() => {
+    const stored = localStorage.getItem('donation-campaign-builder:current-draft');
+    expect(stored).toContain('Library access drive');
+    expect(stored).toContain('Open the reading room seven days a week');
+  });
+});
 
-  await user.clear(screen.getByLabelText('Headline'));
-  await user.type(screen.getByLabelText('Headline'), 'Temporary headline');
-  await user.click(screen.getAllByRole('button', { name: 'Load' })[0]);
+test('updates campaign variant label when preview mode changes', async () => {
+  const user = userEvent.setup();
+  render(<App />);
 
-  expect(screen.getByLabelText('Headline')).toHaveValue('Open the reading room seven days a week');
+  expect(screen.getAllByText('Primary variant').length).toBeGreaterThan(0);
+
+  await user.click(screen.getByRole('button', { name: 'Mobile' }));
+
+  expect(screen.getAllByText('Mobile variant').length).toBeGreaterThan(0);
 });

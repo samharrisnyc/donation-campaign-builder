@@ -2,14 +2,13 @@ import type { AnalyticsMetric, Campaign, VariantResult } from '../types';
 
 const baseMetrics: AnalyticsMetric[] = [
   { label: 'Impressions', value: '18.4K', detail: '+12% vs. last appeal' },
-  { label: 'Clicks', value: '2,946', detail: '16.0% click rate' },
-  { label: 'Conversion', value: '8.7%', detail: 'Projected donor action' },
-  { label: 'Avg. donation', value: '$42', detail: 'Based on amount mix' },
+  { label: 'Conversion', value: '8.7%', detail: 'Projected conversion' },
+  { label: 'Average Donation', value: '$42', detail: 'Based on amount mix' },
 ];
 
 const variantResults: VariantResult[] = [
-  { variant: 'A: Direct ask', clicks: 1480, conversions: 121 },
-  { variant: 'B: Impact ask', clicks: 1660, conversions: 149 },
+  { variant: 'Ask A', clicks: 1480, conversions: 121 },
+  { variant: 'Ask B', clicks: 1660, conversions: 149 },
 ];
 
 type AnalyticsPanelProps = {
@@ -23,13 +22,13 @@ export function AnalyticsPanel({ campaign }: AnalyticsPanelProps) {
       ? Math.round(campaign.donationAmounts.reduce((sum, amount) => sum + amount, 0) / campaign.donationAmounts.length)
       : 0;
   const metrics = baseMetrics.map((metric) =>
-    metric.label === 'Avg. donation' ? { ...metric, value: `$${averageDonation || 42}` } : metric,
+    metric.label === 'Average Donation' ? { ...metric, value: `$${averageDonation || 42}` } : metric,
   );
 
   return (
     <section className="panel analytics-panel" aria-labelledby="analytics-heading">
       <div className="panel-heading">
-        <p className="eyebrow">Mock analytics</p>
+        <p className="eyebrow">Response forecast</p>
         <h2 id="analytics-heading">Campaign pulse</h2>
       </div>
 

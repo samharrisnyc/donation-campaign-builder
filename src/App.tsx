@@ -1,40 +1,35 @@
-import { useMemo, useState } from 'react';
-import { AccessibilityPanel } from './components/AccessibilityPanel';
+import { useEffect, useMemo, useState } from 'react';
 import { AnalyticsPanel } from './components/AnalyticsPanel';
 import { CampaignForm } from './components/CampaignForm';
 import { CampaignPreview } from './components/CampaignPreview';
-import { ExportHtml } from './components/ExportHtml';
-import { SavedDrafts } from './components/SavedDrafts';
 import { blankCampaign } from './data/sampleCampaign';
 import { hasErrors, validateCampaign } from './lib/validation';
-import { loadDrafts, persistDrafts, upsertDraft } from './lib/storage';
-import type { Campaign, CampaignDraft } from './types';
+import { loadCampaign, persistCampaign } from './lib/storage';
+import type { Campaign } from './types';
 
 function App() {
-  const [drafts, setDrafts] = useState<CampaignDraft[]>(() => loadDrafts());
-  const [campaign, setCampaign] = useState<Campaign>(() => drafts[0] ?? blankCampaign);
+  const [campaign, setCampaign] = useState<Campaign>(() => loadCampaign());
   const [previewMode, setPreviewMode] = useState<'desktop' | 'mobile'>('desktop');
   const errors = useMemo(() => validateCampaign(campaign), [campaign]);
+  const lastSaved = useMemo(
+    () =>
+      campaign.updatedAt
+        ? new Intl.DateTimeFormat('en', {
+            month: '2-digit',
+            day: '2-digit',
+            hour: '2-digit',
+            minute: '2-digit',
+          }).format(new Date(campaign.updatedAt))
+        : 'Not saved',
+    [campaign.updatedAt],
+  );
 
-  const saveDraft = () => {
-    const nextDrafts = upsertDraft(drafts, campaign);
-    setDrafts(nextDrafts);
-    setCampaign(nextDrafts.find((draft) => draft.id === campaign.id) ?? campaign);
-    persistDrafts(nextDrafts);
-  };
+  useEffect(() => {
+    persistCampaign(campaign);
+  }, [campaign]);
 
-  const loadDraft = (draft: CampaignDraft) => {
-    setCampaign(draft);
-  };
-
-  const deleteDraft = (id: string) => {
-    const nextDrafts = drafts.filter((draft) => draft.id !== id);
-    setDrafts(nextDrafts);
-    persistDrafts(nextDrafts);
-
-    if (campaign.id === id && nextDrafts[0]) {
-      setCampaign(nextDrafts[0]);
-    }
+  const updateCampaign = (nextCampaign: Campaign) => {
+    setCampaign({ ...nextCampaign, updatedAt: new Date().toISOString() });
   };
 
   const startNewDraft = () => {
@@ -44,46 +39,53 @@ function App() {
   return (
     <main>
       <header className="app-header">
-        <div>
-          <p className="eyebrow">Portfolio project</p>
-          <h1>Donation Campaign Builder</h1>
-          <p>
-            A practical front-end tool for drafting accessible nonprofit donation pages, previewing donor-facing
-            copy, and preparing handoff-ready HTML.
-          </p>
+        <div className="poster-kicker">
+          <span>Campaign workspace</span>
         </div>
-        <button type="button" className="primary-button" onClick={startNewDraft}>New campaign</button>
+        <div className="poster-title-row">
+          <div>
+            <p className="eyebrow">Donation campaign builder</p>
+            <h1>Donation Campaign Builder</h1>
+          </div>
+          <button type="button" className="primary-button" onClick={startNewDraft}>Start new draft</button>
+        </div>
+        <div className="poster-meta" aria-label="Campaign metadata">
+          <div>
+            <span>Draft status</span>
+            <strong>{hasErrors(errors) ? 'Needs review' : 'Ready for review'}</strong>
+          </div>
+          <div>
+            <span>Audience</span>
+            <strong>Individual donors</strong>
+          </div>
+          <div>
+            <span>Variant</span>
+            <strong>{previewMode === 'desktop' ? 'Primary variant' : 'Mobile variant'}</strong>
+          </div>
+          <div>
+            <span>Last saved</span>
+            <strong>{lastSaved}</strong>
+          </div>
+        </div>
+        <p className="header-note">
+          Build a campaign appeal, review the donation ask, and move the draft toward launch.
+        </p>
       </header>
 
-      <div className="status-bar" role="status">
-        {hasErrors(errors)
-          ? 'Draft needs a few required fields before it is campaign-ready.'
-          : 'Draft passes required content checks.'}
-      </div>
-
-      <div className="workspace">
-        <CampaignForm campaign={campaign} errors={errors} onChange={setCampaign} />
-        <CampaignPreview
-          campaign={campaign}
-          previewMode={previewMode}
-          onPreviewModeChange={setPreviewMode}
-        />
-      </div>
-
-      <div className="support-grid">
-        <AccessibilityPanel campaign={campaign} />
-        <AnalyticsPanel campaign={campaign} />
-      </div>
-
-      <div className="support-grid bottom-grid">
-        <SavedDrafts
-          drafts={drafts}
-          currentId={campaign.id}
-          onSave={saveDraft}
-          onLoad={loadDraft}
-          onDelete={deleteDraft}
-        />
-        <ExportHtml campaign={campaign} />
+      <div className="production-board">
+        <div className="board-form">
+          <CampaignForm campaign={campaign} errors={errors} onChange={updateCampaign} />
+        </div>
+        <div className="board-preview">
+          <CampaignPreview
+            campaign={campaign}
+            previewMode={previewMode}
+            onPreviewModeChange={setPreviewMode}
+          />
+        </div>
+        <div className="board-pulse">
+          <AnalyticsPanel campaign={campaign} />
+        </div>
       </div>
     </main>
   );
