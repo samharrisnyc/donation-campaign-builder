@@ -437,12 +437,33 @@ textarea {
 
 .preview-frame.mobile .campaign-card {
   grid-template-columns: 1fr;
-  max-width: 380px;
-  min-height: auto;
+  width: min(100%, 360px);
+  height: auto;
+  min-height: 0;
+  max-width: 360px;
+}
+
+.preview-frame.mobile .campaign-copy {
+  grid-template-rows: none;
+  align-content: start;
+  gap: 10px;
+  padding: 18px;
 }
 
 .preview-frame.mobile .campaign-card h3 {
-  font-size: clamp(2.7rem, 13vw, 4.8rem);
+  max-width: 11ch;
+  align-self: auto;
+  font-size: clamp(2.1rem, 10vw, 3.15rem);
+  line-height: 0.9;
+}
+
+.preview-frame.mobile .campaign-card p {
+  font-size: 0.76rem;
+}
+
+.preview-frame.mobile .preview-status {
+  font-size: 0.62rem;
+  padding: 6px 8px;
 }
 
 .metrics-grid {
